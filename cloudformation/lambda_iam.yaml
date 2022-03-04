@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  AccountID:
+    Type: String
+    Description: The account ID where the IoT Core relies
+  Region:
+    Type: String
+    Description: The region where the IoT Core relies
+    
+Resources:
+
+  # This role will be attached to the AWS Lambda function
+  # for AssumeRole action
+  Role:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: IoTLambdaRole
+      Description: AssumeRole for Lambda
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+              
+  # This policy defines permissions to grant to the
+  # AWS Lambda function regarding AWS IoT Core
+  Policy:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: IoTLambdaPolicy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'logs:CreateLogStream'
+              - 'logs:DescribeLogStreams'
+              - 'logs:PutLogEvents'
+            Resource:
+              - !Sub 
+                - 'arn:aws:logs:${ParamRegion}:${ParamAccountID}:log-group:/*'
+                - ParamRegion: !Ref Region
+                  ParamAccountID: !Ref AccountID
+          - Effect: Allow
+            Action:
+              - 'iot:Connect'
+            Resource:
+              - !Sub 
+                - 'arn:aws:iot:${Region}:${AccountID}:client:/invocation_client'
+                - Region: !Ref Region
+                  AccountID: !Ref AccountID
+          - Effect: Allow
+            Action:
+              - 'iot:Publish'
+            Resource:
+              - !Sub 
+                - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topic:/+/+/invocation'
+                - ParamRegion: !Ref Region
+                  ParamAccountID: !Ref AccountID
+          - Effect: Allow
+            Action:
+              - 'iot:Subscribe'
+            Resource:
+              - !Sub 
+                - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topicfilter:/invocation/#'
+                - ParamRegion: !Ref Region
+                  ParamAccountID: !Ref AccountID
+          - Effect: Allow
+            Action:
+              - 'iot:Receive'
+            Resource:
+              - !Sub 
+                - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topic:/invocation/#'
+                - ParamRegion: !Ref Region
+                  ParamAccountID: !Ref AccountID
+      Roles:
+        - Ref: Role
