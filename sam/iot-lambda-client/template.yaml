@@ -1,0 +1,101 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Transform: AWS::Serverless-2016-10-31
+
+Description: >
+  iot-lambda-client
+
+  Sample SAM Template for iot-lambda-client
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 60
+
+Parameters:
+  AccountID:
+    Type: String
+    Description: The account ID where the IoT Core relies
+  Region:
+    Type: String
+    Description: The region where the IoT Core relies
+  LambdaIoTCoreEndpoint:
+    Type: String
+    Description: The IoT Core endpoint where the AWS Lambda function will conntect to
+  LambdaIoTClientID:
+    Type: String
+    Description: The AWS Lambda function's IoT Client's ID
+
+Resources:
+  IoTLambdaClientFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: endpoint/
+      Handler: app.handler
+      Runtime: python3.9
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          WSS_ENDPOINT: !Ref LambdaIoTCoreEndpoint
+          CLIENT_ID: !Ref LambdaIoTClientID
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'iot:Connect'
+              Resource:
+                # - !Sub 
+                #   - 'arn:aws:iot:${Region}:${AccountID}:client:/${ClientID}'
+                #   - Region: !Ref Region
+                #     AccountID: !Ref AccountID
+                #     ClientID: !Ref LambdaIoTClientID
+                - '*'
+            - Effect: Allow
+              Action:
+                - 'iot:Publish'
+              Resource:
+                - !Sub 
+                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topic:/+/+/${ClientID}'
+                  - ParamRegion: !Ref Region
+                    ParamAccountID: !Ref AccountID
+                    ClientID: !Ref LambdaIoTClientID
+            - Effect: Allow
+              Action:
+                - 'iot:Subscribe'
+              Resource:
+                - !Sub 
+                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topicfilter:/${ClientID}/#'
+                  - ParamRegion: !Ref Region
+                    ParamAccountID: !Ref AccountID
+                    ClientID: !Ref LambdaIoTClientID
+            - Effect: Allow
+              Action:
+                - 'iot:Receive'
+              Resource:
+                - !Sub 
+                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topic:/${ClientID}/#'
+                  - ParamRegion: !Ref Region
+                    ParamAccountID: !Ref AccountID
+                    ClientID: !Ref LambdaIoTClientID
+      Events:
+        Invoke:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /invoke
+            Method: get
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  InvokeApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/invoke/"
+  IoTLambdaClientFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt IoTLambdaClientFunction.Arn
+  IoTLambdaClientIamRole:
+    Description: "Implicit IAM Role created for Hello World function"
+    Value: !GetAtt IoTLambdaClientFunction.Arn
