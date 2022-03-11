@@ -35,6 +35,7 @@ Resources:
       Runtime: python3.9
       Architectures:
         - x86_64
+      MemorySize: 256
       Environment:
         Variables:
           WSS_ENDPOINT: !Ref LambdaIoTCoreEndpoint
@@ -46,18 +47,17 @@ Resources:
               Action:
                 - 'iot:Connect'
               Resource:
-                # - !Sub 
-                #   - 'arn:aws:iot:${Region}:${AccountID}:client:/${ClientID}'
-                #   - Region: !Ref Region
-                #     AccountID: !Ref AccountID
-                #     ClientID: !Ref LambdaIoTClientID
-                - '*'
+                - !Sub 
+                  - 'arn:aws:iot:${Region}:${AccountID}:client/${ClientID}'
+                  - Region: !Ref Region
+                    AccountID: !Ref AccountID
+                    ClientID: !Ref LambdaIoTClientID
             - Effect: Allow
               Action:
                 - 'iot:Publish'
               Resource:
                 - !Sub 
-                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topic:/+/+/${ClientID}'
+                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topic/+/+/${ClientID}'
                   - ParamRegion: !Ref Region
                     ParamAccountID: !Ref AccountID
                     ClientID: !Ref LambdaIoTClientID
@@ -66,7 +66,7 @@ Resources:
                 - 'iot:Subscribe'
               Resource:
                 - !Sub 
-                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topicfilter:/${ClientID}/#'
+                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topicfilter/${ClientID}/*'
                   - ParamRegion: !Ref Region
                     ParamAccountID: !Ref AccountID
                     ClientID: !Ref LambdaIoTClientID
@@ -75,7 +75,7 @@ Resources:
                 - 'iot:Receive'
               Resource:
                 - !Sub 
-                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topic:/${ClientID}/#'
+                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topic/${ClientID}/#'
                   - ParamRegion: !Ref Region
                     ParamAccountID: !Ref AccountID
                     ClientID: !Ref LambdaIoTClientID
