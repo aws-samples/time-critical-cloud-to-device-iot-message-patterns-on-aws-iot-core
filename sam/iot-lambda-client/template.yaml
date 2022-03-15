@@ -25,6 +25,9 @@ Parameters:
   LambdaIoTClientID:
     Type: String
     Description: The AWS Lambda function's IoT Client's ID
+  LambdaName:
+    Type: String
+    Description: The name of your AWS Lambda function
 
 Resources:
   IoTLambdaClientFunction:
@@ -33,6 +36,7 @@ Resources:
       CodeUri: endpoint/
       Handler: app.handler
       Runtime: python3.9
+      FunctionName: !Ref LambdaName
       Architectures:
         - x86_64
       MemorySize: 256
@@ -57,7 +61,7 @@ Resources:
                 - 'iot:Publish'
               Resource:
                 - !Sub 
-                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topic/+/+/${ClientID}/#'
+                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topic/*/*/${ClientID}/*'
                   - ParamRegion: !Ref Region
                     ParamAccountID: !Ref AccountID
                     ClientID: !Ref LambdaIoTClientID
@@ -75,7 +79,7 @@ Resources:
                 - 'iot:Receive'
               Resource:
                 - !Sub 
-                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topic/${ClientID}/#'
+                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topic/${ClientID}/*'
                   - ParamRegion: !Ref Region
                     ParamAccountID: !Ref AccountID
                     ClientID: !Ref LambdaIoTClientID
