@@ -89,7 +89,7 @@ def do_request(p_method, p_request, p_timeout):
     ################################################################################
     #  Create & Connect Client
 
-    this_client_id = f"{g_client_id}"
+    this_client_id = f"{g_client_id}_{g_message_id}"
 
     print(f"Client ID: '{this_client_id}'")
 
@@ -99,7 +99,7 @@ def do_request(p_method, p_request, p_timeout):
                 region=g_region,
                 credentials_provider=credentials_provider,
                 http_proxy_options=proxy_options,
-                client_id=g_client_id,
+                client_id=this_client_id,
                 clean_session=False,
                 keep_alive_secs=30)
 
@@ -124,12 +124,6 @@ def do_request(p_method, p_request, p_timeout):
 
     ################################################################################
     # Send Command
-
-    global g_message_id
-
-    g_message_id = str(uuid.uuid4())
-
-    print(f"Message ID: {g_message_id}")
 
     message = {
         "timestamp": str(get_milliseconds()),
@@ -268,8 +262,13 @@ def handler(event, context):
 
     if method != None and request != None and target != None:
 
-        g_message_ack_topic_prefix = f"{g_client_id}/{target}/{method}/ack"
-        g_message_topic_prefix     = f"{target}/{method}/{g_client_id}"
+        global g_message_id
+        g_message_id = str(uuid.uuid4())
+
+        print(f"Message ID: {g_message_id}")
+
+        g_message_ack_topic_prefix = f"{g_client_id}/{g_message_id}/{target}/{method}/ack"
+        g_message_topic_prefix     = f"{target}/{method}/{g_client_id}/{g_message_id}"
 
         print(f"Message topic: {g_message_topic_prefix}")
         print(f"ACK topic: {g_message_ack_topic_prefix}")

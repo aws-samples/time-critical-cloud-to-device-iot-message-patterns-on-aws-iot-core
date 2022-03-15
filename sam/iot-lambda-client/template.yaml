@@ -48,7 +48,7 @@ Resources:
                 - 'iot:Connect'
               Resource:
                 - !Sub 
-                  - 'arn:aws:iot:${Region}:${AccountID}:client/${ClientID}'
+                  - 'arn:aws:iot:${Region}:${AccountID}:client/${ClientID}*'
                   - Region: !Ref Region
                     AccountID: !Ref AccountID
                     ClientID: !Ref LambdaIoTClientID
@@ -57,7 +57,7 @@ Resources:
                 - 'iot:Publish'
               Resource:
                 - !Sub 
-                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topic/+/+/${ClientID}'
+                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topic/+/+/${ClientID}/#'
                   - ParamRegion: !Ref Region
                     ParamAccountID: !Ref AccountID
                     ClientID: !Ref LambdaIoTClientID
