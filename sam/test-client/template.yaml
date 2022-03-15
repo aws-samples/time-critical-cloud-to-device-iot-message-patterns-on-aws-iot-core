@@ -36,7 +36,7 @@ Resources:
               - 'iot:Publish'
             Resource:
               - !Sub 
-                - 'arn:aws:iot:${Region}:${AccountID}:topic/${ClientID}/#'
+                - 'arn:aws:iot:${Region}:${AccountID}:topic/${ClientID}/*'
                 - Region: !Ref Region
                   AccountID: !Ref AccountID
                   ClientID: !Ref LambdaIoTClientID
@@ -45,7 +45,7 @@ Resources:
               - 'iot:Receive'
             Resource:
               - !Sub 
-                - 'arn:aws:iot:${Region}:${AccountID}:topic/${!iot:Connection.Thing.ThingName}/+/${ClientID}/#'
+                - 'arn:aws:iot:${Region}:${AccountID}:topic/${!iot:ClientId}/*/${ClientID}/*'
                 - Region: !Ref Region
                   AccountID: !Ref AccountID
                   ClientID: !Ref LambdaIoTClientID
@@ -54,7 +54,7 @@ Resources:
               - 'iot:Subscribe'
             Resource:
               - !Sub 
-                - 'arn:aws:iot:${Region}:${AccountID}:topicfilter/${!iot:Connection.Thing.ThingName}/+/${ClientID}/#'
+                - 'arn:aws:iot:${Region}:${AccountID}:topicfilter/${!iot:ClientId}/*'
                 - Region: !Ref Region
                   AccountID: !Ref AccountID
                   ClientID: !Ref LambdaIoTClientID
@@ -63,7 +63,7 @@ Resources:
               - 'iot:Connect'
             Resource:
               - !Sub 
-                - 'arn:aws:iot:${Region}:${AccountID}:client/${!iot:Connection.Thing.ThingName}'
+                - 'arn:aws:iot:${Region}:${AccountID}:client/${!iot:ClientId}'
                 - Region: !Ref Region
                   AccountID: !Ref AccountID
       PolicyName: TestingIoTThingPolicy
