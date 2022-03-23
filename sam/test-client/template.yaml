@@ -71,11 +71,11 @@ Resources:
   TestingIoTThingPolicyCertificateAttachment:
     Type: AWS::IoT::PolicyPrincipalAttachment
     Properties: 
-      PolicyName: TestingIoTThingPolicy
+      PolicyName: !Ref TestingIoTThingPolicy
       Principal: !Ref TestingIoTThingCertificateARN
 
   TestingIoTThingThingCertificateAttachment:
     Type: AWS::IoT::ThingPrincipalAttachment
     Properties: 
       Principal: !Ref TestingIoTThingCertificateARN
-      ThingName: test-iot-thing
+      ThingName: !Ref TestingIoTThing
