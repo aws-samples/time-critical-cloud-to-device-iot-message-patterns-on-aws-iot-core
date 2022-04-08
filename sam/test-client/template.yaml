@@ -12,9 +12,9 @@ Parameters:
   Region:
     Type: String
     Description: The region where the IoT Core relies
-  LambdaIoTClientID:
+  ClientIDPrefix:
     Type: String
-    Description: The AWS Lambda function's IoT Client's ID
+    Description: The AWS Lambda function's IoT Client's ID Prefix
   TestingIoTThingCertificateARN:
     Type: String
     Description: The certificate ARN to be associated to the testing IoT Thing
@@ -36,19 +36,19 @@ Resources:
               - 'iot:Publish'
             Resource:
               - !Sub 
-                - 'arn:aws:iot:${Region}:${AccountID}:topic/${ClientID}/*'
+                - 'arn:aws:iot:${Region}:${AccountID}:topic/${ClientIDPrefix}/*'
                 - Region: !Ref Region
                   AccountID: !Ref AccountID
-                  ClientID: !Ref LambdaIoTClientID
+                  ClientIDPrefix: !Ref ClientIDPrefix
           - Effect: Allow
             Action:
               - 'iot:Receive'
             Resource:
               - !Sub 
-                - 'arn:aws:iot:${Region}:${AccountID}:topic/${!iot:ClientId}/*/${ClientID}/*'
+                - 'arn:aws:iot:${Region}:${AccountID}:topic/${!iot:ClientId}/*/${ClientIDPrefix}/*'
                 - Region: !Ref Region
                   AccountID: !Ref AccountID
-                  ClientID: !Ref LambdaIoTClientID
+                  ClientIDPrefix: !Ref ClientIDPrefix
           - Effect: Allow
             Action:
               - 'iot:Subscribe'
@@ -57,7 +57,7 @@ Resources:
                 - 'arn:aws:iot:${Region}:${AccountID}:topicfilter/${!iot:ClientId}/*'
                 - Region: !Ref Region
                   AccountID: !Ref AccountID
-                  ClientID: !Ref LambdaIoTClientID
+                  ClientIDPrefix: !Ref ClientIDPrefix
           - Effect: Allow
             Action:
               - 'iot:Connect'
