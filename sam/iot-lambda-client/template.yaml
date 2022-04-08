@@ -19,12 +19,12 @@ Parameters:
   Region:
     Type: String
     Description: The region where the IoT Core relies
-  LambdaIoTCoreEndpoint:
+  IoTCoreEndpoint:
     Type: String
     Description: The IoT Core endpoint where the AWS Lambda function will conntect to
-  LambdaIoTClientID:
+  ClientIDPrefix:
     Type: String
-    Description: The AWS Lambda function's IoT Client's ID
+    Description: The AWS Lambda function's IoT Client's ID Prefix
   LambdaName:
     Type: String
     Description: The name of your AWS Lambda function
@@ -42,8 +42,8 @@ Resources:
       MemorySize: 256
       Environment:
         Variables:
-          WSS_ENDPOINT: !Ref LambdaIoTCoreEndpoint
-          CLIENT_ID: !Ref LambdaIoTClientID
+          WSS_ENDPOINT: !Ref IoTCoreEndpoint
+          CLIENT_ID_PREFIX: !Ref ClientIDPrefix
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -52,37 +52,37 @@ Resources:
                 - 'iot:Connect'
               Resource:
                 - !Sub 
-                  - 'arn:aws:iot:${Region}:${AccountID}:client/${ClientID}*'
+                  - 'arn:aws:iot:${Region}:${AccountID}:client/${ClientIDPrefix}*'
                   - Region: !Ref Region
                     AccountID: !Ref AccountID
-                    ClientID: !Ref LambdaIoTClientID
+                    ClientIDPrefix: !Ref ClientIDPrefix
             - Effect: Allow
               Action:
                 - 'iot:Publish'
               Resource:
                 - !Sub 
-                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topic/*/*/${ClientID}/*'
+                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topic/*/*/${ClientIDPrefix}/*'
                   - ParamRegion: !Ref Region
                     ParamAccountID: !Ref AccountID
-                    ClientID: !Ref LambdaIoTClientID
+                    ClientIDPrefix: !Ref ClientIDPrefix
             - Effect: Allow
               Action:
                 - 'iot:Subscribe'
               Resource:
                 - !Sub 
-                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topicfilter/${ClientID}/*'
+                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topicfilter/${ClientIDPrefix}/*'
                   - ParamRegion: !Ref Region
                     ParamAccountID: !Ref AccountID
-                    ClientID: !Ref LambdaIoTClientID
+                    ClientIDPrefix: !Ref ClientIDPrefix
             - Effect: Allow
               Action:
                 - 'iot:Receive'
               Resource:
                 - !Sub 
-                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topic/${ClientID}/*'
+                  - 'arn:aws:iot:${ParamRegion}:${ParamAccountID}:topic/${ClientIDPrefix}/*'
                   - ParamRegion: !Ref Region
                     ParamAccountID: !Ref AccountID
-                    ClientID: !Ref LambdaIoTClientID
+                    ClientIDPrefix: !Ref ClientIDPrefix
       Events:
         Invoke:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api

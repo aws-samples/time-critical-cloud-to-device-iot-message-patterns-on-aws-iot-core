@@ -29,7 +29,7 @@ import os
 import sys
 import threading
 
-g_client_id = ""
+g_client_id_prefix = ""
 g_endpoint = ""
 
 g_message_ack_topic_prefix = ""
@@ -73,7 +73,7 @@ def do_request(p_method, p_request, p_timeout):
 
     global g_is_ack_received
     global g_endpoint
-    global g_client_id
+    global g_client_id_prefix
 
     g_is_ack_received = False
 
@@ -89,9 +89,9 @@ def do_request(p_method, p_request, p_timeout):
     ################################################################################
     #  Create & Connect Client
 
-    this_client_id = f"{g_client_id}_{g_message_id}"
+    mqtt_client_id = f"{g_client_id_prefix}_{g_message_id}"
 
-    print(f"Client ID: '{this_client_id}'")
+    print(f"Client ID: '{mqtt_client_id}'")
 
     mqtt_connection = mqtt_connection_builder.websockets_with_default_aws_signing(
                 endpoint=g_endpoint,
@@ -99,7 +99,7 @@ def do_request(p_method, p_request, p_timeout):
                 region=g_region,
                 credentials_provider=credentials_provider,
                 http_proxy_options=proxy_options,
-                client_id=this_client_id,
+                client_id=mqtt_client_id,
                 clean_session=False,
                 keep_alive_secs=30)
 
@@ -212,13 +212,13 @@ def do_request(p_method, p_request, p_timeout):
 
 def handler(event, context):
 
-    global g_client_id
+    global g_client_id_prefix
     global g_endpoint
     global g_message_ack_topic_prefix
     global g_message_topic_prefix
     global g_region
     
-    g_client_id = os.environ.get("CLIENT_ID")
+    g_client_id_prefix = os.environ.get("CLIENT_ID_PREFIX")
     g_endpoint = os.environ.get("WSS_ENDPOINT")
     g_region = os.environ.get("AWS_REGION")
 
@@ -267,8 +267,8 @@ def handler(event, context):
 
         print(f"Message ID: {g_message_id}")
 
-        g_message_ack_topic_prefix = f"{g_client_id}/{g_message_id}/{target}/{method}/ack"
-        g_message_topic_prefix     = f"{target}/{method}/{g_client_id}/{g_message_id}"
+        g_message_ack_topic_prefix = f"{g_client_id_prefix}/{g_message_id}/{target}/{method}/ack"
+        g_message_topic_prefix     = f"{target}/{method}/{g_client_id_prefix}/{g_message_id}"
 
         print(f"Message topic: {g_message_topic_prefix}")
         print(f"ACK topic: {g_message_ack_topic_prefix}")
