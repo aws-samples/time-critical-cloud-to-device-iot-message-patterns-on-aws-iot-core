@@ -67,6 +67,13 @@ def on_message_received(topic, payload, dup, qos, retain, **kwargs):
     if ('id' in obj.keys()) and (obj['id'] == g_message_id):
         g_is_ack_received = True
 
+    returnobj = {
+            'g_device_response': g_device_response,
+            'g_is_ack_received': g_is_ack_received
+        }
+
+    return returnobj
+
 
 def do_request(p_method, p_request, p_timeout):
     ts_start = get_milliseconds()

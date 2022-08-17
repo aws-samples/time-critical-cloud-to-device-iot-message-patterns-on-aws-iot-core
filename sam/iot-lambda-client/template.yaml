@@ -30,8 +30,32 @@ Parameters:
     Description: The name of your AWS Lambda function
 
 Resources:
+
+  ApiGatewayEndpoint:
+    Type: 'AWS::Serverless::Api'
+    Properties:
+      StageName: Prod
+      Auth:
+        ApiKeyRequired: true
+        UsagePlan:
+          CreateUsagePlan: PER_API
+          UsagePlanName: GatewayAuthorization
+
   IoTLambdaClientFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W89
+            reason: This is a sample API implementation meant for dev stage. Lambda deployment strategy not in scope of solution
+          - id: W92
+            reason: This is a sample API implementation meant for dev stage. No usage quotas are prescribed
+          - id: W68
+            reason: Bug in cfn-nag, the API Deployment is associated with a UsagePlan but warning is thrown anyway
+          - id: W64
+            reason: Bug in cfn-nag, the API Deployment is associated with a UsagePlan but warning is thrown anyway
+          - id: W69
+            reason: This is a sample API implementation meant for dev stage. Access logging is not in scope
     Properties:
       CodeUri: endpoint/
       Handler: app.handler
@@ -87,6 +111,8 @@ Resources:
         Invoke:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
+            RestApiId:
+              Ref: ApiGatewayEndpoint
             Path: /invoke
             Method: get
 
@@ -95,11 +121,11 @@ Outputs:
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
   InvokeApi:
-    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/invoke/"
+    Description: "API Gateway endpoint URL for Prod stage for function"
+    Value: !Sub "https://${ApiGatewayEndpoint}.execute-api.${AWS::Region}.amazonaws.com/Prod/invoke/"
   IoTLambdaClientFunction:
-    Description: "Hello World Lambda Function ARN"
+    Description: "Lambda Function ARN"
     Value: !GetAtt IoTLambdaClientFunction.Arn
   IoTLambdaClientIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
+    Description: "Implicit IAM Role created for function"
     Value: !GetAtt IoTLambdaClientFunction.Arn
