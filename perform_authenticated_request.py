@@ -76,10 +76,6 @@ if access_key is None or secret_key is None:
     print('No access key is available.')
     sys.exit()
 
-# Used in case of AWS_SESSION_TOKEN temorary token
-if session_token is not None:
-    print('Appending also Session Token')
-
 # Create a date for headers and the credential string
 t = datetime.datetime.utcnow()
 amzdate = t.strftime('%Y%m%dT%H%M%SZ')
@@ -104,8 +100,6 @@ canonical_querystring = request_parameters
 # must be trimmed and lowercase, and sorted in code point order from
 # low to high. Note that there is a trailing \n.
 canonical_headers = 'host:' + host + '\n' + 'x-amz-date:' + amzdate + '\n' + 'x-amz-security-token:' + session_token + '\n' if session_token is not None else None
-
-print("Canonical Headers: " + canonical_headers)
 
 # Step 5: Create the list of signed headers. This lists the headers
 # in the canonical_headers list, delimited with ";" and in alpha order.
@@ -149,8 +143,6 @@ authorization_header = algorithm + ' ' + 'Credential=' + access_key + '/' + cred
 # earlier. Order here is not significant.
 # Python note: The 'host' header is added automatically by the Python 'requests' library.
 headers = {'x-amz-date':amzdate, 'Authorization':authorization_header, 'X-Amz-Security-Token': session_token }
-
-print("headers: ", headers)
 
 # ************* SEND THE REQUEST *************
 request_url = ep.scheme + "://" +  ep.hostname + ep.path + '?' + canonical_querystring
