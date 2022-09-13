@@ -57,15 +57,32 @@ Resources:
     Properties:
       StageName: Prod
       Auth:
-        ApiKeyRequired: true
-        UsagePlan:
-          CreateUsagePlan: PER_API
-          UsagePlanName: GatewayAuthorization
+        DefaultAuthorizer: AWS_IAM
       MethodSettings:
         - LoggingLevel: INFO
           ResourcePath: '/*' # allows for logging on any resource
           HttpMethod: '*' # allows for logging on any method
-    DependsOn: ApiGWAccount
+      Models: 
+        Request: 
+          $schema: "http://json-schema.org/draft-04/schema#"
+          properties: 
+            method: 
+              type: string
+            request: 
+              type: string
+            target: 
+              type: string
+            timeout: 
+              type: string
+          required: 
+            - method
+            - request
+            - target
+            - timeout
+          title: Request
+          type: object
+    DependsOn:
+      - ApiGWAccount
           
   IoTLambdaClientFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -141,6 +158,19 @@ Resources:
               Ref: ApiGatewayEndpoint
             Path: /invoke
             Method: get
+            RequestModel:
+              Model: Request
+              ValidateBody: false
+              ValidateParameters: true
+            RequestParameters:
+              - method.request.querystring.method:
+                  Required: true
+              - method.request.querystring.request:
+                  Required: true
+              - method.request.querystring.target:
+                  Required: true
+              - method.request.querystring.timeout:
+                  Required: true
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
